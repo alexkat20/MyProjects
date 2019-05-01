@@ -1,0 +1,206 @@
+#include <iostream>
+using namespace std;
+
+
+template <typename Type>
+struct tree{
+    tree * left = nullptr;
+    tree * right = nullptr;
+    Type value;
+    int height = 0;
+};
+
+
+
+
+
+template <typename Type>
+int height_of_tree(tree<Type>* my_tree) {
+    if (my_tree) {
+        return my_tree->height;
+    }
+    return -1;
+}
+
+template <typename Type>
+void search(tree<Type> *my_tree, Type key){
+    if (my_tree != nullptr){
+        search(my_tree->left, key);
+        if (key == my_tree->value){
+            cout << "Address: " << &my_tree->value << ' ' << "Height: " << my_tree->height << ' ' << "Value: " << my_tree->value << endl;
+        }
+        search(my_tree->right, key);
+    }
+}
+
+template <typename Type>
+void fix(tree<Type>* &my_tree){
+    int h1 = height_of_tree(my_tree->left);
+    int h2 = height_of_tree(my_tree->right);
+    if (h1 > h2){
+        my_tree->height = h1 + 1;
+    }
+    else{
+        my_tree->height = h2 +1;
+    }
+}
+template <typename Type>
+tree<Type>* left_rotation(tree<Type>* &my_tree){
+    tree<Type>* tmp;
+    tmp = my_tree->right;
+    my_tree->right = tmp->left;
+    tmp->left = my_tree;
+    fix(my_tree);
+    fix(tmp);
+    return tmp;
+}
+template <typename Type>
+tree<Type>* right_rotation(tree<Type>* &my_tree){
+    tree<Type>* tmp;
+    tmp = my_tree->left;
+    my_tree->left = tmp->right;
+    tmp->right = my_tree;
+    fix(my_tree);
+    fix(tmp);
+    return tmp;
+}
+
+template <typename Type>
+tree<Type>* balance(tree<Type>* &my_tree){
+    int h1 = height_of_tree(my_tree->left);
+    int h2 = height_of_tree(my_tree->right);
+    if (h1 > h2){
+        my_tree->height = h1 + 1;
+    }
+    else{
+        my_tree->height = h2 +1;
+    }
+    if ((height_of_tree(my_tree->right) - height_of_tree(my_tree->left)) == 2){
+        if ((height_of_tree(my_tree->right->right) - height_of_tree(my_tree->right->left)) < 0){
+            my_tree->right = right_rotation(my_tree->right);
+        }
+        return left_rotation(my_tree);
+    }
+    if((height_of_tree(my_tree->right) - height_of_tree(my_tree->left)) == -2){
+        if ((height_of_tree(my_tree->left->right) - height_of_tree(my_tree->left->left)) > 0){
+            my_tree->left = left_rotation(my_tree->left);
+        }
+        return right_rotation(my_tree);
+    }
+    return my_tree;
+}
+
+template <typename Type>
+void add_branch(Type x, tree<Type>* &my_tree){
+    if (my_tree == nullptr){
+        my_tree = new tree<Type>;
+        my_tree->value = x;
+        my_tree->height = 0;
+        my_tree->left = nullptr;
+        my_tree->right = nullptr;
+    }
+    if (x < my_tree->value){
+        if (my_tree->left != nullptr){
+            add_branch(x, my_tree->left);
+        }
+        else{
+            my_tree->left = new tree<Type>;
+            my_tree->left->left = nullptr;
+            my_tree->left->right = nullptr;
+            my_tree->left->value = x;
+
+        }
+    }
+    else if (x > my_tree->value){
+        if (my_tree->right != nullptr){
+            add_branch(x, my_tree->right);
+        }
+        else{
+            my_tree->right = new tree<Type>;
+            my_tree->right->right = nullptr;
+            my_tree->right->left = nullptr;
+            my_tree->right->value = x;
+
+        }
+    }
+    int h1 = height_of_tree(my_tree->left);
+    int h2 = height_of_tree(my_tree->right);
+    if (h1 > h2){
+        my_tree->height = h1 + 1;
+    }
+    else{
+        my_tree->height = h2 +1;
+    }
+    my_tree = balance(my_tree);
+}
+
+
+
+
+template <typename Type>
+void show_tree(tree<Type>* my_tree){
+    if (my_tree != nullptr){
+        show_tree(my_tree->left);
+        for (int i = 0; i < my_tree->height; i ++){
+            cout << "   ";
+        }
+        cout.width(10);
+        cout << my_tree->value << endl;
+        show_tree(my_tree->right);
+    }
+}
+
+
+
+
+int main() {
+    char answer1;
+    cout << "What type do you want to use to build your tree? Type 's' if you want to use string and 'i' or 'd' if you want to use int or double " << endl;
+    cin >> answer1;
+    if (answer1 == 's'){
+        tree<string> *Tree = nullptr;
+        int n;
+        cout << "How many words would you like to have in your tree? "<< endl;
+        cin >> n;
+        string x;
+        cout << "Now you can enter numbers: " << endl;
+        for (int i = 0; i < n; i++) {
+            cin >> x;
+            add_branch(x, Tree);
+        }
+        cout << endl << endl << endl;
+        show_tree(Tree);
+        char answer;
+        cout << "Do you want to search a key? " << endl;
+        cin >> answer;
+        if (answer == 'y'){
+            string value;
+            cout << "Enter the word, which you want to find: " << endl;
+            cin >> value;
+            search(Tree, value);
+        }
+    }
+    else{
+        tree<double> *Tree = nullptr;
+        int n;
+        cout << "How many numbers would you like to have in your tree? "<< endl;
+        cin >> n;
+        double x;
+        cout << "Now you can enter numbers: " << endl;
+        for (int i = 0; i < n; i++) {
+            cin >> x;
+            add_branch(x, Tree);
+        }
+        cout << endl << endl << endl;
+        show_tree(Tree);
+        char answer;
+        cout << "Do you want to search a key? " << endl;
+        cin >> answer;
+        if (answer == 'y'){
+            double value;
+            cout << "Enter the number, which you want to find: " << endl;
+            cin >> value;
+            search(Tree, value);
+        }
+    }
+}
